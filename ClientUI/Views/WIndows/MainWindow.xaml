@@ -62,9 +62,11 @@
                 Padding="0"
                 BorderBrush="Black"
                 BorderThickness="2"
+                ClipToBounds="True"
                 CornerRadius="20">
 
                 <DataGrid
+                    Margin="0,0,-5,0"
                     AutoGenerateColumns="False"
                     Background="Transparent"
                     BorderThickness="0"
@@ -76,53 +78,6 @@
                     RowHeaderWidth="0"
                     RowHeight="32"
                     SelectionMode="Single">
-                    <!--  Стиль для заголовков столбцов  -->
-                    <DataGrid.ColumnHeaderStyle>
-                        <Style TargetType="DataGridColumnHeader">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="FontSize" Value="16" />
-                            <Setter Property="BorderBrush" Value="Black" />
-                            <Setter Property="BorderThickness" Value="0,0,1,1" />
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="DataGridColumnHeader">
-                                        <Grid>
-                                            <Border
-                                                Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}">
-                                                <ContentPresenter
-                                                    HorizontalAlignment="Stretch"
-                                                    VerticalAlignment="Center"
-                                                    RecognizesAccessKey="True" />
-                                            </Border>
-                                        </Grid>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </DataGrid.ColumnHeaderStyle>
-
-                    <DataGrid.Resources>
-                        <!--  Убираем выделение фона  -->
-                        <Style TargetType="DataGridCell">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="DataGridCell">
-                                        <Border Background="{TemplateBinding Background}">
-                                            <ContentPresenter VerticalAlignment="Center" />
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-
-                        <!--  Тонкие линии между ячейками  -->
-                        <Style TargetType="DataGridRow">
-                            <Setter Property="BorderBrush" Value="#EEEEEE" />
-                            <Setter Property="BorderThickness" Value="0,0,0,1" />
-                        </Style>
-                    </DataGrid.Resources>
 
                     <DataGrid.Columns>
                         <DataGridTextColumn
@@ -139,7 +94,7 @@
                             Binding="{Binding Value}"
                             Header="Значение" />
                         <DataGridTextColumn
-                            Width="300"
+                            Width="*"
                             Binding="{Binding Comment}"
                             Header="Комментарий" />
                     </DataGrid.Columns>
