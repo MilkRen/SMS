@@ -5,6 +5,7 @@
 
 *   **Часть 1 (ConsoleApp, gRPC):** `ConsoleApp`, `DB.BAL`, `DB.Core`, `DB.DAL`, `GrpcClient`, `GrpcServer`
 *   **Часть 2 (WPF):** `WpfApp`
+*   Все логи находятся AppData\Roaming
 
 ## Запуск (Часть 1)
 
