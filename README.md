@@ -20,7 +20,7 @@
 
 1.  Запустите `WpfApp`
 
-![https://github.com/MilkRen/SMS/blob/master/srcGitHub/wpf.png]
+![](https://github.com/MilkRen/SMS/blob/master/srcGitHub/wpf.png)
 
 Пакеты:
 Aspire.Npgsql.EntityFrameworkCore.PostgreSQL
