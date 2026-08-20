@@ -37,10 +37,3 @@ Microsoft.Extensions.Hosting
 Newtonsoft.Json
 Serilog.Extensions.Hosting
 Serilog.Sinks.File
-
-
-
-
-
-
-
