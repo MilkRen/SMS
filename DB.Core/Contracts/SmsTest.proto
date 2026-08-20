@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+
+package sms.test;
+
+option csharp_namespace = "Sms.Test";
+
+// Блюдо
+message MenuItem {
+	string id = 1;		  // ID блюда
+	string article = 2;	  // Артикул
+	string name = 3;	  // Название
+	double price = 4;	  // Цена
+	bool is_weighted = 5; // Весовой товар
+	string full_path = 6; // Полный путь
+	repeated string barcodes = 7; // Штрихкоды
+}
+
+// Доп инфа заказа
+message OrderItem {
+	string id = 1;		 // ID блюда
+	double quantity = 2; // Количество
+}
+
+// Заказ
+message Order {
+	string id = 1;						// ID заказа
+	repeated OrderItem order_items = 2; // Блюда заказа
+}
+
+// ответ
+message GetMenuResponse {
+	bool success = 1;				  // Успешно ли выполнено
+	string error_message = 2;		  // Сообщение об ошибке
+	repeated MenuItem menu_items = 3; // Список блюд
+}
+
+// запрос
+message SendOrderResponse {
+	bool success = 1; 		 // Успешно ли выполнено
+	string error_message = 2;// Сообщение об ошибке
+}
+
+// Сервис для работы с меню и заказами
+service SmsTestService {
+	// получить список блюд
+	rpc GetMenu(google.protobuf.BoolValue) returns (GetMenuResponse);
+
+	// Отправить заказ
+	rpc SendOrder(Order) returns (SendOrderResponse);
+}

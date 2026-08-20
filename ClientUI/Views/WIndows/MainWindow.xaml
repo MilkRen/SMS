@@ -1,0 +1,150 @@
+﻿<Window
+    x:Class="ClientUI.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:behaviors="http://schemas.microsoft.com/xaml/behaviors"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ClientUI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="Главное окно"
+    Width="1200"
+    Height="600"
+    AllowsTransparency="True"
+    Background="Transparent"
+    WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
+    mc:Ignorable="d">
+
+    <behaviors:Interaction.Triggers>
+        <behaviors:EventTrigger EventName="MouseDown">
+            <behaviors:InvokeCommandAction Command="{Binding MoveWindowCommand}" />
+        </behaviors:EventTrigger>
+    </behaviors:Interaction.Triggers>
+
+    <Border Background="White" CornerRadius="35">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="70" />
+                <RowDefinition />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="25" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="25" />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    VerticalAlignment="Center"
+                    FontSize="20"
+                    FontWeight="Bold"
+                    Text="Тестовое WPF-приложение для SmartMealService" />
+
+                <StackPanel
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Orientation="Horizontal">
+                    <Button Command="{Binding MinimizeWindowCommand}" Style="{StaticResource ButtonMinimize}" />
+                    <Button Command="{Binding CloseWindowCommand}" Style="{StaticResource ButtonClose}" />
+                </StackPanel>
+            </Grid>
+
+            <Border
+                Grid.Row="1"
+                Grid.Column="1"
+                Margin="0"
+                Padding="0"
+                BorderBrush="Black"
+                BorderThickness="2"
+                CornerRadius="20">
+
+                <DataGrid
+                    AutoGenerateColumns="False"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    CanUserAddRows="False"
+                    CanUserDeleteRows="False"
+                    GridLinesVisibility="Vertical"
+                    IsReadOnly="False"
+                    ItemsSource="{Binding Items}"
+                    RowHeaderWidth="0"
+                    RowHeight="32"
+                    SelectionMode="Single">
+                    <!--  Стиль для заголовков столбцов  -->
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="FontSize" Value="16" />
+                            <Setter Property="BorderBrush" Value="Black" />
+                            <Setter Property="BorderThickness" Value="0,0,1,1" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridColumnHeader">
+                                        <Grid>
+                                            <Border
+                                                Background="{TemplateBinding Background}"
+                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                BorderThickness="{TemplateBinding BorderThickness}">
+                                                <ContentPresenter
+                                                    HorizontalAlignment="Stretch"
+                                                    VerticalAlignment="Center"
+                                                    RecognizesAccessKey="True" />
+                                            </Border>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.Resources>
+                        <!--  Убираем выделение фона  -->
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border Background="{TemplateBinding Background}">
+                                            <ContentPresenter VerticalAlignment="Center" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+
+                        <!--  Тонкие линии между ячейками  -->
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="BorderBrush" Value="#EEEEEE" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        </Style>
+                    </DataGrid.Resources>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+                            Width="50"
+                            Header=""
+                            IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Width="200"
+                            Binding="{Binding Name}"
+                            Header="Поле"
+                            IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Width="300"
+                            Binding="{Binding Value}"
+                            Header="Значение" />
+                        <DataGridTextColumn
+                            Width="300"
+                            Binding="{Binding Comment}"
+                            Header="Комментарий" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

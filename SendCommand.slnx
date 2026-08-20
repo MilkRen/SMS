@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="ClientUI/WpfApp.csproj" Id="46f66d7e-7969-41fd-ac6f-6eebfd47842e" />
+  <Project Path="DB.BAL/DB.BAL.csproj" />
+  <Project Path="DB.Core/DB.Core.csproj" Id="d496857e-228d-4360-aa9b-80ba4d256aa4" />
+  <Project Path="DB.DAL/DB.DAL.csproj" />
+  <Project Path="GrpcServer/GrpcServer.csproj" Id="5f7fb95d-3c2a-498e-bd17-2ab7c6e62458" />
+  <Project Path="SendCommand/GrpcClient.csproj" />
+  <Project Path="Server/ConsoleApp.csproj" />
+</Solution>
