@@ -105,6 +105,9 @@ namespace Server
             }
         }
 
+        /// <summary>
+        /// Получить список меню с сервера и записать в БД
+        /// </summary>
         private static async Task GetMenuAsync(ClienGRPC clientGRPC, IMenuItemService menuItemService)
         {
             ConsolePlus.WriteLine("Отправляем команду на сервер GRPC");
@@ -117,21 +120,30 @@ namespace Server
             if (result == ErrorDb.Fatal || result == ErrorDb.Undefined)
                 throw new Exception("Не получилось создать запись в БД");
 
-            ConsolePlus.WriteLine("Вывод списка блюд");
-            ConsolePlus.WriteLine("Название – Код (артикул) – Цена за единицу");
-            foreach (var item in menu)
-                ConsolePlus.WriteLine($"{item.Name} – {item.Article} – {item.Price}");
+            var menuItem = await menuItemService.GetMenuAsync();
+            await MenuWrite(menuItem);
 
             ConsolePlus.WriteLine("Вышли из команды!", ConsoleColor.DarkYellow, isLog: false);
         }
 
-        private static async Task SendOrderAsync(ClienGRPC clientGRPC, IMenuItemService menuItemService)
+        /// <summary>
+        /// Вывести список пеню
+        /// </summary>
+        private static async Task MenuWrite(List<MenuItemDTO> menuItem)
         {
-            var menuItem = await menuItemService.GetMenuAsync();
             ConsolePlus.WriteLine("Вывод списка блюд из БД");
             ConsolePlus.WriteLine("Название – Код (артикул) – Цена за единицу");
             foreach (var item in menuItem)
                 ConsolePlus.WriteLine($"{item.Name} – {item.Article} – {item.Price}");
+        }
+
+        /// <summary>
+        /// Отправить заказ с блюдами
+        /// </summary>
+        private static async Task SendOrderAsync(ClienGRPC clientGRPC, IMenuItemService menuItemService)
+        {
+            var menuItem = await menuItemService.GetMenuAsync();
+            await MenuWrite(menuItem);
 
             while (true)
             {
