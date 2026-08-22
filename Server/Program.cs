@@ -127,7 +127,7 @@ namespace Server
         }
 
         /// <summary>
-        /// Вывести список пеню
+        /// Вывести список меню
         /// </summary>
         private static async Task MenuWrite(List<MenuItemDTO> menuItem)
         {
