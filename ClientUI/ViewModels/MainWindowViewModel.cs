@@ -13,28 +13,15 @@ namespace WpfApp.ViewModels
         #region Services
         private readonly IDialogWindowService _dialogWindow;
 
-        private readonly IWindowService _windowService;
-
         private readonly IJsonConfigurationServices _jsonConfigurationServices;
-
-        #endregion
-
-        #region Fields
-
-        private Action _dragMoveAction;
-
-        private Action _closeAction;
 
         #endregion
 
         #region Ctor
 
-        public MainWindowViewModel(Action closeAction, Action dragMove, IWindowService windowService, IJsonConfigurationServices jsonConfigurationServices)
+        public MainWindowViewModel(IDialogWindowService dialogWindow, IJsonConfigurationServices jsonConfigurationServices)
         {
-            _dragMoveAction = dragMove;
-            _closeAction = closeAction;
-            _dialogWindow = new DialogWindowService();
-            _windowService = windowService;
+            _dialogWindow = dialogWindow;
             _jsonConfigurationServices = jsonConfigurationServices;
 
             MoveWindowCommand = new LambdaCommand(OnMoveWindowCommandExecuted, CanMoveWindowCommandExecute);
@@ -52,26 +39,21 @@ namespace WpfApp.ViewModels
         private bool CanMoveWindowCommandExecute(object p) => true;
         private void OnMoveWindowCommandExecuted(object p)
         {
-            if (Mouse.LeftButton == MouseButtonState.Pressed)
-            {
-                _dialogWindow.DragMoveAction = _dragMoveAction;
-                _dialogWindow.DragMoveWindow();
-            }
+            _dialogWindow.DragMoveWindow();
         }
 
         public Command CloseWindowCommand { get; }
         private bool CanCloseWindowCommandExecute(object p) => true;
         private void OnCloseWindowCommandExecuted(object p)
         {
-            _dialogWindow.CloseAction = _closeAction;
-            _dialogWindow.CloseAction();
+            _dialogWindow.CloseWindow();
         }
 
         public Command MinimizeWindowCommand { get; }
         private bool CanMinimizeWindowCommandExecute(object p) => true;
         private void OnMinimizeWindowCommandExecuted(object p)
         {
-            _windowService.Window.WindowState = System.Windows.WindowState.Minimized;
+            _dialogWindow.MinimizeWindow();
         }
 
         #endregion

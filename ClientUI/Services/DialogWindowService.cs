@@ -1,6 +1,6 @@
 ﻿using ClientUI;
-using System.Xml.Linq;
-using WpfApp.Constants;
+using System.Windows;
+using System.Windows.Input;
 using WpfApp.Services.Interfaces;
 using WpfApp.ViewModels;
 
@@ -11,20 +11,34 @@ namespace WpfApp.Services
     /// </summary>
     public class DialogWindowService : IDialogWindowService
     {
-        public Action CloseAction { get; set; }
-
-        public Action DragMoveAction { get; set; }
-
         public void CloseWindow()
         {
-            App.Logger.Information("Кнопка - закрыть приложение");
-            CloseAction();
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window.DataContext is MainWindowViewModel)
+                    window.Close();
+            }
         }
 
         public void DragMoveWindow()
         {
-            App.Logger.Information("Кнопка - Перетаскивание приложения");
-            DragMoveAction();
+            if (Mouse.LeftButton == MouseButtonState.Pressed)
+            {
+                foreach (Window window in Application.Current.Windows)
+                {
+                    if (window.DataContext is MainWindowViewModel)
+                        window.DragMove();
+                }
+            }
+        }
+
+        public void MinimizeWindow()
+        {
+            foreach (Window window in Application.Current.Windows)
+            {
+                if(window.DataContext is MainWindowViewModel)
+                    window.WindowState = WindowState.Minimized;
+            }
         }
 
         /// <summary>
@@ -33,7 +47,7 @@ namespace WpfApp.Services
         public void OpenMainWindow()
         {
             var mainWindow = new MainWindow();
-            mainWindow.DataContext = new MainWindowViewModel(mainWindow.Close, mainWindow.DragMove, new WindowService(mainWindow), new JsonConfigurationServices());
+            mainWindow.DataContext = new MainWindowViewModel(this, new JsonConfigurationServices());
             mainWindow.Show();
             App.Logger.Information("Открыто главное окно");
         }

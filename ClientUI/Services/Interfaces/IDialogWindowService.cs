@@ -5,13 +5,11 @@
     /// </summary>
     public interface IDialogWindowService
     {
-        Action CloseAction { get; set; }
-
-        Action DragMoveAction { get; set; }
-
         void CloseWindow();
 
         void DragMoveWindow();
+
+        void MinimizeWindow();
 
         /// <summary>
         /// Открытие главного окна
