@@ -77,105 +77,10 @@ namespace Server
                     switch (readline)
                     {
                         case CommandConstant.GetMenu:
-                            ConsolePlus.WriteLine("Отправляем команду на сервер GRPC");
-                            var menu = await clientGRPC.GetMenuAsync();
-                            if (!menu.Any())
-                                throw new ArgumentOutOfRangeException(nameof(menu), "Пустая коллекция");
-
-                            ConsolePlus.WriteLine("Получили список блюд и записываем в БД");
-                            var result = (ErrorDb)await menuItemService.CreateManyMenuAsync(menu.ConvertAll(x => new MenuItemDTO(x.Article, x.Name, x.Price, x.IsWeighted, x.FullPath, x.Barcodes.ToList())));
-                            if(result == ErrorDb.Fatal || result == ErrorDb.Undefined)
-                                throw new Exception("Не получилось создать запись в БД");
-
-                            ConsolePlus.WriteLine("Вывод списка блюд");
-                            ConsolePlus.WriteLine("Название – Код (артикул) – Цена за единицу");
-                            foreach (var item in menu)
-                                ConsolePlus.WriteLine($"{item.Name} – {item.Article} – {item.Price}");
-
-                            ConsolePlus.WriteLine("Вышли из команды!", ConsoleColor.DarkYellow, isLog: false);
+                            await GetMenuAsync(clientGRPC, menuItemService);
                             break;
                         case CommandConstant.SendOrder:
-                            var menuItem = await menuItemService.GetMenuAsync();
-                            ConsolePlus.WriteLine("Вывод списка блюд из БД");
-                            ConsolePlus.WriteLine("Название – Код (артикул) – Цена за единицу");
-                            foreach (var item in menuItem)
-                                ConsolePlus.WriteLine($"{item.Name} – {item.Article} – {item.Price}");
-
-                            while (true)
-                            {
-                                var isValid = true;
-                                ConsolePlus.WriteLine("Введите данные для меню в формате \"Код1:Количество1;Код2:Количество2;Код3:Количество3;...\"");
-                                var menuLine = Convert.ToString(Console.ReadLine()).Trim();
-                                if (string.IsNullOrEmpty(menuLine))
-                                {
-                                    ConsolePlus.WriteLine("Вышли из команды!", ConsoleColor.DarkRed);
-                                    break;
-                                }
-
-                                var menuElement = menuLine.Split(";", StringSplitOptions.RemoveEmptyEntries);
-                                if (menuElement is null)
-                                {
-                                    ConsolePlus.WriteLine("Некорректный формат", ConsoleColor.DarkRed);
-                                    break;
-                                }
-
-                                var menuElementList = new List<(string code, double quantity)>();
-                                for (var i = 0; i < menuElement.Length; i++)
-                                {
-                                    var element = menuElement[i].Split(":", StringSplitOptions.RemoveEmptyEntries);
-                                    if (element.Length != 2)
-                                    {
-                                        var textError = $"Некорректный формат: '{string.Join(":", element)}'";
-                                        ConsolePlus.WriteLine(textError, ConsoleColor.DarkRed, isLog: false);
-                                        Log.Error(textError);
-                                        isValid = false;
-                                        break;
-                                    }
-
-                                    var code = element[0].Trim();
-                                    if (!double.TryParse(element[1].Trim(), out var quantity) || quantity <= 0)
-                                    {
-                                        var textError = $"Некорректное количество: '{element[1]}' для кода '{code}'. Должно быть > 0";
-                                        ConsolePlus.WriteLine(textError, ConsoleColor.DarkRed, isLog: false);
-                                        Log.Error(textError);
-                                        isValid = false;
-                                    }
-
-                                    if (!menuItem.Any(x => x.Article == code))
-                                    {
-                                        var textError = $"Блюдо с кодом '{code}' не найдено.";
-                                        ConsolePlus.WriteLine(textError, ConsoleColor.DarkRed, isLog: false);
-                                        Log.Error(textError);
-                                        isValid = false;
-                                    }
-
-                                    if(isValid)
-                                        menuElementList.Add(new(code, quantity));
-                                }
-
-                                if (!isValid)
-                                {
-                                    ConsolePlus.WriteLine("Повторите ввод!", ConsoleColor.DarkYellow);
-                                    continue;
-                                }
-
-                                var newOrder = new Order();
-                                foreach (var item in menuElementList)
-                                {
-                                    var newOrderItem = new OrderItem()
-                                    {
-                                        Id = item.code,
-                                        Quantity = item.quantity,
-                                    };
-                                    newOrder.OrderItems.Add(newOrderItem);
-                                }
-
-                                if(await clientGRPC.SendOrderAsync(newOrder))
-                                    ConsolePlus.WriteLine("УСПЕХ", ConsoleColor.DarkGreen);
-
-                                ConsolePlus.WriteLine("Вышли из команды!", ConsoleColor.DarkYellow, isLog: false);
-                                break;
-                            }
+                            await SendOrderAsync(clientGRPC, menuItemService);
                             break;
                         case CommandConstant.Clear:
                             Console.Clear();
@@ -197,6 +102,111 @@ namespace Server
             {
                 ConsolePlus.WriteLine(ex.Message,ConsoleColor.DarkRed, ConsoleColor.Black, isLog: false);
                 Log.Fatal(ex, "Ошибка при выполнении!");
+            }
+        }
+
+        private static async Task GetMenuAsync(ClienGRPC clientGRPC, IMenuItemService menuItemService)
+        {
+            ConsolePlus.WriteLine("Отправляем команду на сервер GRPC");
+            var menu = await clientGRPC.GetMenuAsync();
+            if (!menu.Any())
+                throw new ArgumentOutOfRangeException(nameof(menu), "Пустая коллекция");
+
+            ConsolePlus.WriteLine("Получили список блюд и записываем в БД");
+            var result = (ErrorDb)await menuItemService.CreateManyMenuAsync(menu.ConvertAll(x => new MenuItemDTO(x.Article, x.Name, x.Price, x.IsWeighted, x.FullPath, x.Barcodes.ToList())));
+            if (result == ErrorDb.Fatal || result == ErrorDb.Undefined)
+                throw new Exception("Не получилось создать запись в БД");
+
+            ConsolePlus.WriteLine("Вывод списка блюд");
+            ConsolePlus.WriteLine("Название – Код (артикул) – Цена за единицу");
+            foreach (var item in menu)
+                ConsolePlus.WriteLine($"{item.Name} – {item.Article} – {item.Price}");
+
+            ConsolePlus.WriteLine("Вышли из команды!", ConsoleColor.DarkYellow, isLog: false);
+        }
+
+        private static async Task SendOrderAsync(ClienGRPC clientGRPC, IMenuItemService menuItemService)
+        {
+            var menuItem = await menuItemService.GetMenuAsync();
+            ConsolePlus.WriteLine("Вывод списка блюд из БД");
+            ConsolePlus.WriteLine("Название – Код (артикул) – Цена за единицу");
+            foreach (var item in menuItem)
+                ConsolePlus.WriteLine($"{item.Name} – {item.Article} – {item.Price}");
+
+            while (true)
+            {
+                var isValid = true;
+                ConsolePlus.WriteLine("Введите данные для меню в формате \"Код1:Количество1;Код2:Количество2;Код3:Количество3;...\"");
+                var menuLine = Convert.ToString(Console.ReadLine()).Trim();
+                if (string.IsNullOrEmpty(menuLine))
+                {
+                    ConsolePlus.WriteLine("Вышли из команды!", ConsoleColor.DarkRed);
+                    break;
+                }
+
+                var menuElement = menuLine.Split(";", StringSplitOptions.RemoveEmptyEntries);
+                if (menuElement is null)
+                {
+                    ConsolePlus.WriteLine("Некорректный формат", ConsoleColor.DarkRed);
+                    break;
+                }
+
+                var menuElementList = new List<(string code, double quantity)>();
+                for (var i = 0; i < menuElement.Length; i++)
+                {
+                    var element = menuElement[i].Split(":", StringSplitOptions.RemoveEmptyEntries);
+                    if (element.Length != 2)
+                    {
+                        var textError = $"Некорректный формат: '{string.Join(":", element)}'";
+                        ConsolePlus.WriteLine(textError, ConsoleColor.DarkRed, isLog: false);
+                        Log.Error(textError);
+                        isValid = false;
+                        break;
+                    }
+
+                    var code = element[0].Trim();
+                    if (!double.TryParse(element[1].Trim(), out var quantity) || quantity <= 0)
+                    {
+                        var textError = $"Некорректное количество: '{element[1]}' для кода '{code}'. Должно быть > 0";
+                        ConsolePlus.WriteLine(textError, ConsoleColor.DarkRed, isLog: false);
+                        Log.Error(textError);
+                        isValid = false;
+                    }
+
+                    if (!menuItem.Any(x => x.Article == code))
+                    {
+                        var textError = $"Блюдо с кодом '{code}' не найдено.";
+                        ConsolePlus.WriteLine(textError, ConsoleColor.DarkRed, isLog: false);
+                        Log.Error(textError);
+                        isValid = false;
+                    }
+
+                    if (isValid)
+                        menuElementList.Add(new(code, quantity));
+                }
+
+                if (!isValid)
+                {
+                    ConsolePlus.WriteLine("Повторите ввод!", ConsoleColor.DarkYellow);
+                    continue;
+                }
+
+                var newOrder = new Order();
+                foreach (var item in menuElementList)
+                {
+                    var newOrderItem = new OrderItem()
+                    {
+                        Id = item.code,
+                        Quantity = item.quantity,
+                    };
+                    newOrder.OrderItems.Add(newOrderItem);
+                }
+
+                if (await clientGRPC.SendOrderAsync(newOrder))
+                    ConsolePlus.WriteLine("УСПЕХ", ConsoleColor.DarkGreen);
+
+                ConsolePlus.WriteLine("Вышли из команды!", ConsoleColor.DarkYellow, isLog: false);
+                break;
             }
         }
     }
